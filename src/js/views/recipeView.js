@@ -1,19 +1,34 @@
-import icons from 'url:../../img/icons.svg';
-import { RECIPE_CONTAINER } from '../config.js';
-import { Fraction } from 'fraction.js';
-import View from './view.js';
+// Importing necessary modules and assets
+import icons from 'url:../../img/icons.svg'; // Importing icons for SVG usage
+import { RECIPE_CONTAINER } from '../config.js'; // Importing recipe container configuration
+import { Fraction } from 'fraction.js'; // Importing Fraction library for fractional calculations
+import View from './view.js'; // Importing base View class
 
+// RecipeView class extending the base View class
 class RecipeView extends View {
+  // Parent element where the recipe will be rendered
   _parentElement = RECIPE_CONTAINER;
+
+  // Default error message to display when a recipe is not found
   _errorMessage = 'We could not find that recipe. Please try another one!';
+
+  // Default success message (currently unused)
   _message = '';
 
+  /**
+   * Adds event listeners for rendering the recipe when the hash changes or the page loads.
+   * @param {Function} handler - The handler function to execute on events.
+   */
   addHandlerRender(handler) {
     ['hashchange', 'load'].forEach(ev => {
       window.addEventListener(ev, handler);
     });
   }
 
+  /**
+   * Generates the markup for the recipe view.
+   * @returns {string} - The HTML string for the recipe view.
+   */
   _generateMarkup() {
     return `<figure class="recipe__fig">
           <img src="${this._data.image}" alt="${
@@ -25,6 +40,7 @@ class RecipeView extends View {
         </figure>
 
         <div class="recipe__details">
+          <!-- Recipe cooking time -->
           <div class="recipe__info">
             <svg class="recipe__info-icon">
               <use href="${icons}#icon-clock"></use>
@@ -34,6 +50,8 @@ class RecipeView extends View {
             }</span>
             <span class="recipe__info-text">minutes</span>
           </div>
+
+          <!-- Recipe servings -->
           <div class="recipe__info">
             <svg class="recipe__info-icon">
               <use href="${icons}#icon-users"></use>
@@ -43,6 +61,7 @@ class RecipeView extends View {
             }</span>
             <span class="recipe__info-text">servings</span>
 
+            <!-- Buttons to increase or decrease servings -->
             <div class="recipe__info-buttons">
               <button class="btn--tiny btn--increase-servings">
                 <svg>
@@ -57,11 +76,14 @@ class RecipeView extends View {
             </div>
           </div>
 
+          <!-- User-generated recipe icon -->
           <div class="recipe__user-generated">
             <svg>
               <use href="${icons}#icon-user"></use>
             </svg>
           </div>
+
+          <!-- Bookmark button -->
           <button class="btn--round">
             <svg class="">
               <use href="${icons}#icon-bookmark-fill"></use>
@@ -69,12 +91,14 @@ class RecipeView extends View {
           </button>
         </div>
 
+        <!-- Recipe ingredients -->
         <div class="recipe__ingredients">
           <h2 class="heading--2">Recipe ingredients</h2>
           <ul class="recipe__ingredient-list">
           ${this._data.ingredients.map(this._generateMarkupIngredient).join('')}
         </div>
 
+        <!-- Recipe directions -->
         <div class="recipe__directions">
           <h2 class="heading--2">How to cook it</h2>
           <p class="recipe__directions-text">
@@ -97,6 +121,11 @@ class RecipeView extends View {
         </div>`;
   }
 
+  /**
+   * Generates the markup for a single ingredient.
+   * @param {Object} ingredients - The ingredient object containing quantity, unit, and description.
+   * @returns {string} - The HTML string for the ingredient.
+   */
   _generateMarkupIngredient(ingredients) {
     return `<li class="recipe__ingredient">
               <svg class="recipe__icon">
@@ -115,4 +144,5 @@ class RecipeView extends View {
   }
 }
 
+// Exporting an instance of RecipeView
 export default new RecipeView();

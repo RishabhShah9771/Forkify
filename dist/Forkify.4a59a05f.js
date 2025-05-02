@@ -700,15 +700,24 @@ const controlSearchResults = async function() {
         const query = (0, _searchViewJsDefault.default).getQuery();
         if (!query) return;
         await _modelJs.loadSearchResults(query);
-        (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage(1));
+        (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage());
         (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
     } catch (error) {
         (0, _resultsViewJsDefault.default).renderError();
     }
 };
+const controlPagination = function(goToPage) {
+    (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage(goToPage));
+    (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+};
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
     (0, _searchViewJsDefault.default).addHandleSearch(controlSearchResults);
+    (0, _paginationViewJsDefault.default).addHandlerCLick(controlPagination);
 };
 init();
 
@@ -2583,12 +2592,14 @@ try {
 },{}],"3QBkH":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+// Export the state and functions for use in other modules
 parcelHelpers.export(exports, "state", ()=>state);
 parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 parcelHelpers.export(exports, "loadSearchResults", ()=>loadSearchResults);
 parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage);
 var _configJs = require("./config.js");
 var _helpersJs = require("./helpers.js");
+// State object to store application data
 const state = {
     recipe: {},
     search: {
@@ -2598,10 +2609,13 @@ const state = {
         page: (0, _configJs.DEFAULT_PAGE)
     }
 };
+// Function to load a recipe by its ID
 const loadRecipe = async function(id) {
     try {
+        // Fetch recipe data from the API
         const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}/${id}`);
         const { recipe } = data.data;
+        // Transform and store the recipe data in the state
         state.recipe = {
             id: recipe.id,
             title: recipe.title,
@@ -2613,13 +2627,17 @@ const loadRecipe = async function(id) {
             ingredients: recipe.ingredients
         };
     } catch (error) {
+        // Rethrow the error to be handled by the caller
         throw error;
     }
 };
+// Function to load search results based on a query
 const loadSearchResults = async function(query) {
     try {
-        state.search.query = query;
+        state.search.query = query; // Update the search query in the state
+        // Fetch search results from the API
         const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}?search=${query}`);
+        // Transform and store the search results in the state
         state.search.results = data.data.recipes.map((recipe)=>{
             return {
                 id: recipe.id,
@@ -2629,14 +2647,18 @@ const loadSearchResults = async function(query) {
             };
         });
     } catch (error) {
+        // Log the error and rethrow it
         console.error(`${error} \u{1F4A5}`);
         throw error;
     }
 };
+// Function to get search results for a specific page
 const getSearchResultsPage = function(page = state.search.page) {
-    state.search.page = page;
+    state.search.page = page; // Update the current page in the state
+    // Calculate the start and end indices for slicing the results
     const startPageValue = (page - 1) * state.search.resultsPerPage;
     const endPageValue = page * state.search.resultsPerPage;
+    // Return a slice of the results for the current page
     if (state.search.results.length === 0) return [];
     return state.search.results.slice(startPageValue, endPageValue);
 };
@@ -2665,41 +2687,56 @@ const PAGINATION_CONTAINER = document.querySelector('.pagination');
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"7nL9P":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "getJSON", ()=>getJSON);
-var _configJs = require("./config.js");
+parcelHelpers.export(exports, "getJSON", ()=>getJSON) // Export the getJSON function for use in other modules
+;
+var _configJs = require("./config.js"); // Import timeout duration from the config file
+// Function to create a timeout promise that rejects after a specified number of seconds
 const timeout = function(s) {
     return new Promise(function(_, reject) {
         setTimeout(function() {
-            reject(new Error(`Request took too long! Timeout after ${s} second`));
-        }, s * 1000);
+            reject(new Error(`Request took too long! Timeout after ${s} second`)); // Reject with an error message after timeout
+        }, s * 1000); // Convert seconds to milliseconds
     });
 };
+// Function to fetch JSON data from a given URL with a timeout mechanism
 const getJSON = async function(url) {
     try {
+        // Use Promise.race to fetch data or timeout, whichever happens first
         const response = await Promise.race([
             fetch(url),
             timeout((0, _configJs.TIMEOUT_SEC))
         ]);
-        const data = await response.json();
+        const data = await response.json(); // Parse the response as JSON
+        // If the response is not OK, throw an error with details
         if (!response.ok) throw new Error(`Recipe not found: (${data.message}) (${response.status})`);
-        return data;
-    } catch (err) {}
+        return data; // Return the parsed JSON data
+    } catch (err) {
+    // Catch and handle any errors (currently does nothing with the error)
+    }
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","./config.js":"2hPh4"}],"3wx5k":[function(require,module,exports,__globalThis) {
+// Importing necessary modules and assets
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _iconsSvg = require("url:../../img/icons.svg");
+var _iconsSvg = require("url:../../img/icons.svg"); // Importing icons for SVG usage
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
-var _configJs = require("../config.js");
-var _fractionJs = require("fraction.js");
-var _viewJs = require("./view.js");
+var _configJs = require("../config.js"); // Importing recipe container configuration
+var _fractionJs = require("fraction.js"); // Importing Fraction library for fractional calculations
+var _viewJs = require("./view.js"); // Importing base View class
 var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+// RecipeView class extending the base View class
 class RecipeView extends (0, _viewJsDefault.default) {
+    // Parent element where the recipe will be rendered
     _parentElement = (0, _configJs.RECIPE_CONTAINER);
+    // Default error message to display when a recipe is not found
     _errorMessage = 'We could not find that recipe. Please try another one!';
+    // Default success message (currently unused)
     _message = '';
-    addHandlerRender(handler) {
+    /**
+   * Adds event listeners for rendering the recipe when the hash changes or the page loads.
+   * @param {Function} handler - The handler function to execute on events.
+   */ addHandlerRender(handler) {
         [
             'hashchange',
             'load'
@@ -2707,7 +2744,10 @@ class RecipeView extends (0, _viewJsDefault.default) {
             window.addEventListener(ev, handler);
         });
     }
-    _generateMarkup() {
+    /**
+   * Generates the markup for the recipe view.
+   * @returns {string} - The HTML string for the recipe view.
+   */ _generateMarkup() {
         return `<figure class="recipe__fig">
           <img src="${this._data.image}" alt="${this._data.title}" class="recipe__img" />
           <h1 class="recipe__title">
@@ -2716,6 +2756,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
         </figure>
 
         <div class="recipe__details">
+          <!-- Recipe cooking time -->
           <div class="recipe__info">
             <svg class="recipe__info-icon">
               <use href="${0, _iconsSvgDefault.default}#icon-clock"></use>
@@ -2723,6 +2764,8 @@ class RecipeView extends (0, _viewJsDefault.default) {
             <span class="recipe__info-data recipe__info-data--minutes">${this._data.cookingTime}</span>
             <span class="recipe__info-text">minutes</span>
           </div>
+
+          <!-- Recipe servings -->
           <div class="recipe__info">
             <svg class="recipe__info-icon">
               <use href="${0, _iconsSvgDefault.default}#icon-users"></use>
@@ -2730,6 +2773,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
             <span class="recipe__info-data recipe__info-data--people">${this._data.servings}</span>
             <span class="recipe__info-text">servings</span>
 
+            <!-- Buttons to increase or decrease servings -->
             <div class="recipe__info-buttons">
               <button class="btn--tiny btn--increase-servings">
                 <svg>
@@ -2744,11 +2788,14 @@ class RecipeView extends (0, _viewJsDefault.default) {
             </div>
           </div>
 
+          <!-- User-generated recipe icon -->
           <div class="recipe__user-generated">
             <svg>
               <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
             </svg>
           </div>
+
+          <!-- Bookmark button -->
           <button class="btn--round">
             <svg class="">
               <use href="${0, _iconsSvgDefault.default}#icon-bookmark-fill"></use>
@@ -2756,12 +2803,14 @@ class RecipeView extends (0, _viewJsDefault.default) {
           </button>
         </div>
 
+        <!-- Recipe ingredients -->
         <div class="recipe__ingredients">
           <h2 class="heading--2">Recipe ingredients</h2>
           <ul class="recipe__ingredient-list">
           ${this._data.ingredients.map(this._generateMarkupIngredient).join('')}
         </div>
 
+        <!-- Recipe directions -->
         <div class="recipe__directions">
           <h2 class="heading--2">How to cook it</h2>
           <p class="recipe__directions-text">
@@ -2781,7 +2830,11 @@ class RecipeView extends (0, _viewJsDefault.default) {
           </a>
         </div>`;
     }
-    _generateMarkupIngredient(ingredients) {
+    /**
+   * Generates the markup for a single ingredient.
+   * @param {Object} ingredients - The ingredient object containing quantity, unit, and description.
+   * @returns {string} - The HTML string for the ingredient.
+   */ _generateMarkupIngredient(ingredients) {
         return `<li class="recipe__ingredient">
               <svg class="recipe__icon">
                 <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
@@ -2794,6 +2847,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
             </li>`;
     }
 }
+// Exporting an instance of RecipeView
 exports.default = new RecipeView();
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","fraction.js":"md6n5","../config.js":"2hPh4","./view.js":"2kjY2","url:../../img/icons.svg":"fd0vu"}],"md6n5":[function(require,module,exports,__globalThis) {
@@ -3174,20 +3228,24 @@ Licensed under the MIT license.
 },{}],"2kjY2":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _iconsSvg = require("url:../../img/icons.svg");
+var _iconsSvg = require("url:../../img/icons.svg"); // Importing icons for use in SVG elements
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
+    // Render the provided data to the DOM
     render(data) {
+        // If no data is provided or the data is an empty array, render an error message
         if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
-        this._data = data;
-        const markup = this._generateMarkup();
-        this._clear();
-        this._parentElement.insertAdjacentHTML('afterbegin', markup);
+        this._data = data; // Store the data in the instance
+        const markup = this._generateMarkup(); // Generate the HTML markup based on the data
+        this._clear(); // Clear the parent element
+        this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the generated markup into the DOM
     }
+    // Clear the content of the parent element
     _clear() {
         this._parentElement.innerHTML = '';
     }
+    // Render a spinner (loading indicator) in the parent element
     renderSpinner() {
         const markup = `
         <div class="spinner">
@@ -3196,9 +3254,10 @@ class View {
           </svg>
         </div>
       `;
-        this._parentElement.innerHTML = '';
-        this._parentElement.insertAdjacentHTML('afterbegin', markup);
+        this._parentElement.innerHTML = ''; // Clear the parent element
+        this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the spinner markup
     }
+    // Render a success message in the parent element
     renderMessage(message = this._message) {
         const markup = `<div class="message">
               <div>
@@ -3208,9 +3267,10 @@ class View {
               </div>
               <p>${message}</p>
             </div>`;
-        this._clear();
-        this._parentElement.insertAdjacentHTML('afterbegin', markup);
+        this._clear(); // Clear the parent element
+        this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the message markup
     }
+    // Render an error message in the parent element
     renderError(message = this._errorMessage) {
         const markup = `<div class="error">
                 <div>
@@ -3220,11 +3280,11 @@ class View {
                 </div>
                 <p>${message}</p>
               </div>`;
-        this._clear();
-        this._parentElement.insertAdjacentHTML('afterbegin', markup);
+        this._clear(); // Clear the parent element
+        this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the error message markup
     }
 }
-exports.default = View;
+exports.default = View; // Export the View class as the default export
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","url:../../img/icons.svg":"fd0vu"}],"fd0vu":[function(require,module,exports,__globalThis) {
 module.exports = module.bundle.resolve("icons.0809ef97.svg") + "?" + Date.now();
@@ -3232,42 +3292,61 @@ module.exports = module.bundle.resolve("icons.0809ef97.svg") + "?" + Date.now();
 },{}],"kbE4Z":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _configJs = require("../config.js");
+var _configJs = require("../config.js"); // Import the search form element from the configuration file
 class SearchView {
     _parentElement = (0, _configJs.SEARCH_FORM);
+    // Method to get the search query from the input field
     getQuery() {
-        const query = this._parentElement.querySelector('.search__field').value;
-        this.#clearInput();
-        return query;
+        const query = this._parentElement.querySelector('.search__field').value; // Get the value of the input field
+        this.#clearInput(); // Clear the input field after retrieving the query
+        return query; // Return the query string
     }
+    // Method to add an event listener for the search form submission
     addHandleSearch(handler) {
         this._parentElement.addEventListener('submit', function(event) {
-            event.preventDefault();
-            handler();
+            event.preventDefault(); // Prevent the default form submission behavior
+            handler(); // Call the handler function passed as an argument
         });
     }
+    // Private method to clear the input field
     #clearInput() {
-        this._parentElement.querySelector('.search__field').value = '';
+        this._parentElement.querySelector('.search__field').value = ''; // Set the input field value to an empty string
     }
 }
+// Export an instance of the SearchView class as the default export
 exports.default = new SearchView();
 
 },{"../config.js":"2hPh4","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"kBQ4r":[function(require,module,exports,__globalThis) {
+// Import the base View class
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _viewJs = require("./view.js");
 var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+// Import icons for SVG usage
 var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
+// Import configuration constants
 var _configJs = require("../config.js");
+// Define the ResultsView class, extending the base View class
 class ResultsView extends (0, _viewJsDefault.default) {
+    // Parent element where the results will be rendered
     _parentElement = (0, _configJs.RESULTS_CONTAINER);
+    // Default error message to display when no results are found
     _errorMessage = 'No recipes found for your query! Please try again';
+    // Default success message (currently unused)
     _message = '';
-    _generateMarkup() {
+    /**
+   * Generate the markup for the entire results list
+   * @returns {string} - HTML string for all results
+   */ _generateMarkup() {
+        // Map over the data and generate markup for each result
         return this._data.map(this._generateMarkupPreview).join('');
     }
-    _generateMarkupPreview(results) {
+    /**
+   * Generate the markup for a single result preview
+   * @param {Object} results - The result object containing recipe details
+   * @returns {string} - HTML string for a single result
+   */ _generateMarkupPreview(results) {
         return ` 
      <li class="preview">
             <a class="preview__link preview__link--active" href="#${results.id}">
@@ -3287,6 +3366,7 @@ class ResultsView extends (0, _viewJsDefault.default) {
           </li>`;
     }
 }
+// Export an instance of the ResultsView class
 exports.default = new ResultsView();
 
 },{"./view.js":"2kjY2","../config.js":"2hPh4","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","url:../../img/icons.svg":"fd0vu"}],"7NIiB":[function(require,module,exports,__globalThis) {
@@ -3298,38 +3378,61 @@ var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 var _configJs = require("../config.js");
 class PaginationView extends (0, _viewJsDefault.default) {
+    // The parent element where pagination buttons will be rendered
     _parentElement = (0, _configJs.PAGINATION_CONTAINER);
-    _generateMarkup() {
-        const currentPage = this._data.page;
-        const numPages = Math.ceil(this._data.results.length / this._data.resultsPerPage);
-        // Page 1 and there are other pages
-        if (currentPage === 1 && numPages > 1) return `<button class="btn--inline pagination__btn--next">
+    /**
+   * Adds an event listener to handle clicks on pagination buttons.
+   * @param {Function} handler - The function to handle the page change.
+   */ addHandlerCLick(handler) {
+        this._parentElement.addEventListener('click', function(event) {
+            event.preventDefault();
+            // Find the closest button with the class 'btn--inline'
+            const btn = event.target.closest('.btn--inline');
+            if (!btn) return; // If no button is clicked, exit the function
+            // Extract the page number to navigate to from the button's dataset
+            const goToPage = +btn.dataset.goto;
+            // Call the handler function with the target page number
+            handler(goToPage);
+        });
+    }
+    /**
+   * Generates the markup for pagination buttons based on the current page and total pages.
+   * @returns {string} The HTML string for the pagination buttons.
+   */ _generateMarkup() {
+        const currentPage = this._data.page; // Current active page
+        const numPages = Math.ceil(this._data.results.length / this._data.resultsPerPage); // Total number of pages
+        // Case 1: Page 1 and there are other pages
+        if (currentPage === 1 && numPages > 1) // Render only the "next" button
+        return `<button data-goto="${currentPage + 1}" class="btn--inline pagination__btn--next">
             <span>${currentPage + 1}</span>
             <svg class="search__icon">
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
             </svg>
           </button>`;
-        // Last Page
-        if (currentPage === numPages && numPages > 1) return `<button class="btn--inline pagination__btn--prev">
+        // Case 2: Last page
+        if (currentPage === numPages && numPages > 1) // Render only the "previous" button
+        return `<button data-goto="${currentPage - 1}" class="btn--inline pagination__btn--prev">
             <svg class="search__icon">
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-left"></use>
             </svg>
             <span>${currentPage - 1}</span>
           </button>`;
-        // Other Page
-        if (currentPage < numPages) return `<button class="btn--inline pagination__btn--prev">
+        // Case 3: Any other page (middle pages)
+        if (currentPage < numPages) // Render both "previous" and "next" buttons
+        return `<button data-goto="${currentPage - 1}" class="btn--inline pagination__btn--prev">
             <svg class="search__icon">
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-left"></use>
             </svg>
             <span>${currentPage - 1}</span>
           </button>
-          <button class="btn--inline pagination__btn--next">
+          <button data-goto="${currentPage + 1}" class="btn--inline pagination__btn--next">
             <span>${currentPage + 1}</span>
             <svg class="search__icon">
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
             </svg>
           </button>`;
-        // Page 1 and there are no other pages
+        // Case 4: Page 1 and there are no other pages
+        // Render nothing if there's only one page
         return '';
     }
 }
