@@ -2579,7 +2579,6 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state);
 parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
-var _regeneratorRuntime = require("regenerator-runtime");
 const state = {
     recipe: {}
 };
@@ -2606,7 +2605,7 @@ const loadRecipe = async function(id) {
     }
 };
 
-},{"regenerator-runtime":"f6ot0","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"3wx5k":[function(require,module,exports,__globalThis) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"3wx5k":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _iconsSvg = require("url:../../img/icons.svg");
@@ -2713,8 +2712,7 @@ class RecipeView {
         </div>`;
     }
     #generateMarkupIngredient(ingredients) {
-        (ingredients)=>{
-            return `<li class="recipe__ingredient">
+        return `<li class="recipe__ingredient">
               <svg class="recipe__icon">
                 <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
               </svg>
@@ -2724,7 +2722,6 @@ class RecipeView {
           ${ingredients.description}
               </div>
             </li>`;
-        };
     }
 }
 exports.default = new RecipeView();

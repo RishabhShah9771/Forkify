@@ -115,8 +115,7 @@ class RecipeView {
   }
 
   #generateMarkupIngredient(ingredients) {
-    ingredients => {
-      return `<li class="recipe__ingredient">
+    return `<li class="recipe__ingredient">
               <svg class="recipe__icon">
                 <use href="${icons}#icon-check"></use>
               </svg>
@@ -130,7 +129,6 @@ class RecipeView {
           ${ingredients.description}
               </div>
             </li>`;
-    };
   }
 }
 
