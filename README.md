@@ -33,18 +33,6 @@ Forkify is a modern JavaScript application for searching, viewing, and managing 
 4. Adjust the servings as needed using the controls.
 5. Bookmark recipes by clicking the bookmark icon.
 
-## Screenshots
-### Home Page
-![Home Page](https://via.placeholder.com/800x400?text=Home+Page)
-
-### Recipe Search
-![Recipe Search](https://via.placeholder.com/800x400?text=Recipe+Search)
-
-### Recipe Details
-![Recipe Details](https://via.placeholder.com/800x400?text=Recipe+Details)
-
-### Bookmarked Recipes
-![Bookmarked Recipes](https://via.placeholder.com/800x400?text=Bookmarked+Recipes)
 
 ## Technologies Used
 - JavaScript (ES6+)
@@ -57,6 +45,5 @@ Forkify is a modern JavaScript application for searching, viewing, and managing 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## Acknowledgments
-- [Jonas Schmedtmann](https://codingheroes.io/) for the original project idea and guidance.
 - [Forkify API](https://forkify-api.herokuapp.com/) for providing recipe data.
 - Open-source libraries and tools used in the project.
