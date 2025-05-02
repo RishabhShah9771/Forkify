@@ -13,7 +13,9 @@ const controlRecipe = async function () {
     recipeView.renderSpinner();
     await model.loadRecipe(id);
     recipeView.render(model.state.recipe);
-  } catch (err) {}
+  } catch (err) {
+    recipeView.renderError();
+  }
 };
 
 const init = function () {
