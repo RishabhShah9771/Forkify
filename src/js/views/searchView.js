@@ -1,5 +1,4 @@
 import { SEARCH_FORM } from '../config.js';
-import View from './view.js';
 
 class SearchView {
   _parentElement = SEARCH_FORM;

@@ -3212,8 +3212,6 @@ module.exports = module.bundle.resolve("icons.0809ef97.svg") + "?" + Date.now();
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _configJs = require("../config.js");
-var _viewJs = require("./view.js");
-var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
 class SearchView {
     _parentElement = (0, _configJs.SEARCH_FORM);
     getQuery() {
@@ -3233,7 +3231,7 @@ class SearchView {
 }
 exports.default = new SearchView();
 
-},{"../config.js":"2hPh4","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","./view.js":"2kjY2"}],"kBQ4r":[function(require,module,exports,__globalThis) {
+},{"../config.js":"2hPh4","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"kBQ4r":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _viewJs = require("./view.js");
