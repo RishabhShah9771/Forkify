@@ -1,5 +1,5 @@
-import { API_URL } from './config.js';
-import { getJSON } from './helpers.js';
+import { API_URL, API_KEY } from './config.js';
+import { getJSON, setJSON } from './helpers.js';
 import { RESULTS_PER_PAGE, DEFAULT_PAGE } from './config.js';
 
 // State object to store application data
@@ -14,6 +14,20 @@ const state = {
   bookmarks: [], // Stores bookmarked recipes
 };
 
+const createRecipeObject = function (data) {
+  const { recipe } = data.data;
+  return {
+    id: recipe.id, // Recipe ID
+    title: recipe.title, // Recipe title
+    publisher: recipe.publisher, // Publisher of the recipe
+    SourceUrl: recipe.source_url, // URL of the recipe source
+    image: recipe.image_url, // URL of the recipe image
+    servings: recipe.servings, // Number of servings
+    cookingTime: recipe.cooking_time, // Cooking time in minutes
+    ingredients: recipe.ingredients, // List of ingredients
+  };
+};
+
 // Function to load a recipe by its ID
 const loadRecipe = async function (id) {
   try {
@@ -22,16 +36,7 @@ const loadRecipe = async function (id) {
     const { recipe } = data.data;
 
     // Transform and store the recipe data in the state
-    state.recipe = {
-      id: recipe.id, // Recipe ID
-      title: recipe.title, // Recipe title
-      publisher: recipe.publisher, // Publisher of the recipe
-      SourceUrl: recipe.source_url, // URL of the recipe source
-      image: recipe.image_url, // URL of the recipe image
-      servings: recipe.servings, // Number of servings
-      cookingTime: recipe.cooking_time, // Cooking time in minutes
-      ingredients: recipe.ingredients, // List of ingredients
-    };
+    state.recipe = createRecipeObject(data);
 
     // Check if the recipe is bookmarked and update the state
     if (state.bookmarks.some(bookmark => bookmark.id === id)) {
@@ -132,10 +137,42 @@ const init = function () {
   if (storage) state.bookmarks = JSON.parse(storage);
 };
 init();
+
 const clearBookmarks = function () {
   localStorage.clear('bookmarks');
 };
 //clearBookmarks();
+
+const uploadRecipe = async function (newRecipe) {
+  try {
+    const ingredients = Object.entries(newRecipe)
+      .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
+      .map(ing => {
+        const ingArray = ing[1].replaceAll(' ', '').split(',');
+        if (ingArray.length !== 3)
+          throw new Error(
+            `Wrong ingredient format! Please use the correct format !`
+          );
+        const [quantity, unit, description] = ingArray;
+
+        return { quantity: quantity ? +quantity : null, unit, description };
+      });
+    const recipe = {
+      title: newRecipe.title,
+      source_url: newRecipe.SourceUrl,
+      image_url: newRecipe.image,
+      publisher: newRecipe.publisher,
+      cooking_time: +newRecipe.cookingTime,
+      servings: +newRecipe.servings,
+      ingredients,
+    };
+
+    const data = await setJSON(`${API_URL}?key=${API_KEY}`, recipe);
+    state.recipe = createRecipeObject(data);
+  } catch (error) {
+    throw error;
+  }
+};
 
 // Export the state and functions for use in other modules
 export {
@@ -146,4 +183,5 @@ export {
   updateServings, // Function to update servings and adjust ingredients
   addBookmark, // Function to add a recipe to bookmarks
   deleteBookmark, // Function to delete a recipe from bookmarks
+  uploadRecipe,
 };

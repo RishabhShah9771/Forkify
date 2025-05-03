@@ -1,31 +1,52 @@
-import { TIMEOUT_SEC } from './config.js'; // Import timeout duration from the config file
+import { TIMEOUT_SEC } from './config.js';
 
-// Function to create a timeout promise that rejects after a specified number of seconds
 const timeout = function (s) {
   return new Promise(function (_, reject) {
     setTimeout(function () {
-      reject(new Error(`Request took too long! Timeout after ${s} second`)); // Reject with an error message after timeout
-    }, s * 1000); // Convert seconds to milliseconds
+      reject(new Error(`Request took too long! Timeout after ${s} second`));
+    }, s * 1000);
   });
 };
 
-// Function to fetch JSON data from a given URL with a timeout mechanism
 const getJSON = async function (url) {
   try {
-    // Use Promise.race to fetch data or timeout, whichever happens first
     const response = await Promise.race([fetch(url), timeout(TIMEOUT_SEC)]);
-    const data = await response.json(); // Parse the response as JSON
+    const data = await response.json();
 
-    // If the response is not OK, throw an error with details
     if (!response.ok)
       throw new Error(
         `Recipe not found: (${data.message}) (${response.status})`
       );
 
-    return data; // Return the parsed JSON data
+    return data;
+  } catch (err) {}
+};
+
+const setJSON = async function (url, uploadData) {
+  try {
+    // Add a log to inspect the data being sent
+    console.log('Uploading data:', uploadData);
+
+    const fetchPro = fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(uploadData),
+    });
+    const response = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+    const data = await response.json();
+
+    if (!response.ok)
+      throw new Error(
+        `Recipe not found: (${data.message}) (${response.status})`
+      );
+
+    return data;
   } catch (err) {
-    // Catch and handle any errors (currently does nothing with the error)
+    console.error('Error in setJSON:', err);
+    throw err; // Rethrow the error to propagate it
   }
 };
 
-export { getJSON }; // Export the getJSON function for use in other modules
+export { getJSON, setJSON };
