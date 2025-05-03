@@ -714,8 +714,15 @@ const controlPagination = function(goToPage) {
         behavior: 'smooth'
     });
 };
+const controlServings = function(newServings) {
+    // Update the recipe servings (in state)
+    _modelJs.updateServings(newServings);
+    // Update the recipe view
+    (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+};
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
+    (0, _recipeViewJsDefault.default).addHandlerUpdateServings(controlServings);
     (0, _searchViewJsDefault.default).addHandleSearch(controlSearchResults);
     (0, _paginationViewJsDefault.default).addHandlerCLick(controlPagination);
 };
@@ -2597,6 +2604,7 @@ parcelHelpers.export(exports, "state", ()=>state);
 parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 parcelHelpers.export(exports, "loadSearchResults", ()=>loadSearchResults);
 parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage);
+parcelHelpers.export(exports, "updateServings", ()=>updateServings);
 var _configJs = require("./config.js");
 var _helpersJs = require("./helpers.js");
 // State object to store application data
@@ -2648,7 +2656,6 @@ const loadSearchResults = async function(query) {
         });
     } catch (error) {
         // Log the error and rethrow it
-        console.error(`${error} \u{1F4A5}`);
         throw error;
     }
 };
@@ -2662,11 +2669,17 @@ const getSearchResultsPage = function(page = state.search.page) {
     if (state.search.results.length === 0) return [];
     return state.search.results.slice(startPageValue, endPageValue);
 };
+const updateServings = function(newServings) {
+    if (Array.isArray(state.recipe.ingredients)) state.recipe.ingredients.forEach((ing)=>{
+        ing.quantity = ing.quantity * newServings / state.recipe.servings;
+    // newQt = oldQt * newServings / oldServings // 2 * 8 / 4 = 4
+    });
+    state.recipe.servings = newServings;
+};
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","./config.js":"2hPh4","./helpers.js":"7nL9P"}],"2hPh4":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-// https://forkify-api.jonas.io
 parcelHelpers.export(exports, "API_URL", ()=>API_URL);
 parcelHelpers.export(exports, "TIMEOUT_SEC", ()=>TIMEOUT_SEC);
 parcelHelpers.export(exports, "RECIPE_CONTAINER", ()=>RECIPE_CONTAINER);
@@ -2744,6 +2757,15 @@ class RecipeView extends (0, _viewJsDefault.default) {
             window.addEventListener(ev, handler);
         });
     }
+    addHandlerUpdateServings(handler) {
+        this._parentElement.addEventListener('click', function(e) {
+            e.preventDefault();
+            const btn = e.target.closest('.btn--update-servings');
+            if (!btn) return;
+            const updateTo = +btn.dataset.updateTo;
+            if (updateTo > 0) handler(updateTo);
+        });
+    }
     /**
    * Generates the markup for the recipe view.
    * @returns {string} - The HTML string for the recipe view.
@@ -2775,12 +2797,12 @@ class RecipeView extends (0, _viewJsDefault.default) {
 
             <!-- Buttons to increase or decrease servings -->
             <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
+              <button  class="btn--tiny btn--update-servings" data-update-to="${this._data.servings - 1}">
                 <svg>
                   <use href="${0, _iconsSvgDefault.default}#icon-minus-circle"></use>
                 </svg>
               </button>
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-update-to="${this._data.servings + 1}">
                 <svg>
                   <use href="${0, _iconsSvgDefault.default}#icon-plus-circle"></use>
                 </svg>

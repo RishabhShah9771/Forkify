@@ -7,7 +7,6 @@ const RESULTS_PER_PAGE = 10;
 const DEFAULT_PAGE = 1;
 const PAGINATION_CONTAINER = document.querySelector('.pagination');
 
-// https://forkify-api.jonas.io
 export {
   API_URL,
   TIMEOUT_SEC,

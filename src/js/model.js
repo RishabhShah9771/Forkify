@@ -56,7 +56,6 @@ const loadSearchResults = async function (query) {
     });
   } catch (error) {
     // Log the error and rethrow it
-    console.error(`${error} 💥`);
     throw error;
   }
 };
@@ -74,5 +73,22 @@ const getSearchResultsPage = function (page = state.search.page) {
   return state.search.results.slice(startPageValue, endPageValue);
 };
 
+const updateServings = function (newServings) {
+  if (Array.isArray(state.recipe.ingredients)) {
+    state.recipe.ingredients.forEach(ing => {
+      ing.quantity = (ing.quantity * newServings) / state.recipe.servings;
+      // newQt = oldQt * newServings / oldServings // 2 * 8 / 4 = 4
+    });
+  }
+
+  state.recipe.servings = newServings;
+};
+
 // Export the state and functions for use in other modules
-export { state, loadRecipe, loadSearchResults, getSearchResultsPage };
+export {
+  state,
+  loadRecipe,
+  loadSearchResults,
+  getSearchResultsPage,
+  updateServings,
+};
