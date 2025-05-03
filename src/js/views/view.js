@@ -1,3 +1,4 @@
+import { mark } from 'regenerator-runtime';
 import icons from 'url:../../img/icons.svg'; // Importing icons for use in SVG elements
 
 class View {
@@ -7,13 +8,15 @@ class View {
    * Render the provided data to the DOM
    * @param {Object|Array} data - The data to be rendered
    */
-  render(data) {
+  render(data, render = true) {
     // If no data is provided or the data is an empty array, render an error message
     if (!data || (Array.isArray(data) && data.length === 0))
       return this.renderError();
 
     this._data = data; // Store the data in the instance
     const markup = this._generateMarkup(); // Generate the HTML markup based on the data
+
+    if (!render) return markup;
     this._clear(); // Clear the parent element
     this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the generated markup into the DOM
   }

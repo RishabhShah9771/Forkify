@@ -6,6 +6,7 @@ const RESULTS_CONTAINER = document.querySelector('.results');
 const RESULTS_PER_PAGE = 10;
 const DEFAULT_PAGE = 1;
 const PAGINATION_CONTAINER = document.querySelector('.pagination');
+const BOOKMARK_LIST = document.querySelector('.bookmarks__list');
 
 export {
   API_URL,
@@ -16,4 +17,5 @@ export {
   RESULTS_PER_PAGE,
   DEFAULT_PAGE,
   PAGINATION_CONTAINER,
+  BOOKMARK_LIST,
 };

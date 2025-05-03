@@ -7,6 +7,7 @@ import recipeView from './views/recipeView.js'; // Importing the recipe view
 import searchView from './views/searchView.js'; // Importing the search view
 import resultsView from './views/resultsView.js'; // Importing the results view
 import paginationView from './views/paginationView.js'; // Importing the pagination view
+import bookmarksView from './views/bookmarksView.js';
 
 // if (module.hot) {
 //   module.hot.accept();
@@ -21,6 +22,8 @@ const controlRecipe = async function () {
 
     // Updating results view to mark selected search results
     resultsView.update(model.getSearchResultsPage());
+
+    bookmarksView.update(model.state.bookmarks);
 
     await model.loadRecipe(id); // Load the recipe data
 
@@ -66,8 +69,10 @@ const controlAddBookmark = function () {
   // Add or remove a bookmark for the current recipe
   if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
   else model.deleteBookmark(model.state.recipe.id);
-  console.log(model.state.recipe); // Log the updated recipe state
   recipeView.update(model.state.recipe); // Update the recipe view
+
+  // Render the bookmarks
+  bookmarksView.render(model.state.bookmarks);
 };
 
 const init = function () {
