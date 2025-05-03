@@ -668,16 +668,16 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"7dWZ8":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _webImmediateJs = require("core-js/modules/web.immediate.js");
-var _runtime = require("regenerator-runtime/runtime");
-var _modelJs = require("./model.js");
-var _recipeViewJs = require("./views/recipeView.js");
+var _webImmediateJs = require("core-js/modules/web.immediate.js"); // Start the application
+var _runtime = require("regenerator-runtime/runtime"); // Polyfilling async/await
+var _modelJs = require("./model.js"); // Importing the model for state management
+var _recipeViewJs = require("./views/recipeView.js"); // Importing the recipe view
 var _recipeViewJsDefault = parcelHelpers.interopDefault(_recipeViewJs);
-var _searchViewJs = require("./views/searchView.js");
+var _searchViewJs = require("./views/searchView.js"); // Importing the search view
 var _searchViewJsDefault = parcelHelpers.interopDefault(_searchViewJs);
-var _resultsViewJs = require("./views/resultsView.js");
+var _resultsViewJs = require("./views/resultsView.js"); // Importing the results view
 var _resultsViewJsDefault = parcelHelpers.interopDefault(_resultsViewJs);
-var _paginationViewJs = require("./views/paginationView.js");
+var _paginationViewJs = require("./views/paginationView.js"); // Importing the pagination view
 var _paginationViewJsDefault = parcelHelpers.interopDefault(_paginationViewJs);
 'use strict';
 // if (module.hot) {
@@ -685,32 +685,35 @@ var _paginationViewJsDefault = parcelHelpers.interopDefault(_paginationViewJs);
 // }
 const controlRecipe = async function() {
     try {
-        const id = window.location.hash.slice(1);
-        if (!id) return;
-        (0, _recipeViewJsDefault.default).renderSpinner();
+        const id = window.location.hash.slice(1); // Get the recipe ID from the URL hash
+        if (!id) return; // If no ID, exit the function
+        (0, _recipeViewJsDefault.default).renderSpinner(); // Render a loading spinner
         // Updating results view to mark selected search results
         (0, _resultsViewJsDefault.default).update(_modelJs.getSearchResultsPage());
-        await _modelJs.loadRecipe(id);
-        (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+        await _modelJs.loadRecipe(id); // Load the recipe data
+        (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe); // Render the recipe
     } catch (error) {
-        (0, _recipeViewJsDefault.default).renderError();
+        (0, _recipeViewJsDefault.default).renderError(); // Render an error message
     }
 };
 const controlSearchResults = async function() {
     try {
-        (0, _resultsViewJsDefault.default).renderSpinner();
-        const query = (0, _searchViewJsDefault.default).getQuery();
-        if (!query) return;
-        await _modelJs.loadSearchResults(query);
-        (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage());
-        (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
+        (0, _resultsViewJsDefault.default).renderSpinner(); // Render a loading spinner
+        const query = (0, _searchViewJsDefault.default).getQuery(); // Get the search query
+        if (!query) return; // If no query, exit the function
+        await _modelJs.loadSearchResults(query); // Load search results
+        (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage()); // Render the search results
+        (0, _paginationViewJsDefault.default).render(_modelJs.state.search); // Render the pagination
     } catch (error) {
-        (0, _resultsViewJsDefault.default).renderError();
+        (0, _resultsViewJsDefault.default).renderError(); // Render an error message
     }
 };
 const controlPagination = function(goToPage) {
+    // Render the search results for the specified page
     (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage(goToPage));
+    // Render the updated pagination buttons
     (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
+    // Scroll to the top of the page smoothly
     window.scrollTo({
         top: 0,
         behavior: 'smooth'
@@ -719,13 +722,26 @@ const controlPagination = function(goToPage) {
 const controlServings = function(newServings) {
     // Update the recipe servings (in state)
     _modelJs.updateServings(newServings);
-    // Update the recipe view
+    // Update the recipe view with the new servings
     (0, _recipeViewJsDefault.default).update(_modelJs.state.recipe);
 };
+const controlAddBookmark = function() {
+    // Add or remove a bookmark for the current recipe
+    if (!_modelJs.state.recipe.bookmarked) _modelJs.addBookmark(_modelJs.state.recipe);
+    else _modelJs.deleteBookmark(_modelJs.state.recipe.id);
+    console.log(_modelJs.state.recipe); // Log the updated recipe state
+    (0, _recipeViewJsDefault.default).update(_modelJs.state.recipe); // Update the recipe view
+};
 const init = function() {
+    // Initialize event handlers for rendering the recipe
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
+    // Initialize event handlers for updating servings
     (0, _recipeViewJsDefault.default).addHandlerUpdateServings(controlServings);
+    // Initialize event handlers for adding/removing bookmarks
+    (0, _recipeViewJsDefault.default).addHandlerAddBookmark(controlAddBookmark);
+    // Initialize event handlers for search functionality
     (0, _searchViewJsDefault.default).addHandleSearch(controlSearchResults);
+    // Initialize event handlers for pagination
     (0, _paginationViewJsDefault.default).addHandlerCLick(controlPagination);
 };
 init();
@@ -2607,6 +2623,8 @@ parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 parcelHelpers.export(exports, "loadSearchResults", ()=>loadSearchResults);
 parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage);
 parcelHelpers.export(exports, "updateServings", ()=>updateServings);
+parcelHelpers.export(exports, "addBookmark", ()=>addBookmark);
+parcelHelpers.export(exports, "deleteBookmark", ()=>deleteBookmark);
 var _configJs = require("./config.js");
 var _helpersJs = require("./helpers.js");
 // State object to store application data
@@ -2617,7 +2635,8 @@ const state = {
         results: [],
         resultsPerPage: (0, _configJs.RESULTS_PER_PAGE),
         page: (0, _configJs.DEFAULT_PAGE)
-    }
+    },
+    bookmarks: []
 };
 // Function to load a recipe by its ID
 const loadRecipe = async function(id) {
@@ -2636,6 +2655,9 @@ const loadRecipe = async function(id) {
             cookingTime: recipe.cooking_time,
             ingredients: recipe.ingredients
         };
+        // Check if the recipe is bookmarked and update the state
+        if (state.bookmarks.some((bookmark)=>bookmark.id === id)) state.recipe.bookmarked = true;
+        else state.recipe.bookmarked = false;
     } catch (error) {
         // Rethrow the error to be handled by the caller
         throw error;
@@ -2644,7 +2666,8 @@ const loadRecipe = async function(id) {
 // Function to load search results based on a query
 const loadSearchResults = async function(query) {
     try {
-        state.search.query = query; // Update the search query in the state
+        // Update the search query in the state
+        state.search.query = query;
         // Fetch search results from the API
         const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}?search=${query}`);
         // Transform and store the search results in the state
@@ -2656,6 +2679,8 @@ const loadSearchResults = async function(query) {
                 image: recipe.image_url
             };
         });
+        // Reset the current page to the default page
+        state.search.page = (0, _configJs.DEFAULT_PAGE);
     } catch (error) {
         // Log the error and rethrow it
         throw error;
@@ -2663,7 +2688,8 @@ const loadSearchResults = async function(query) {
 };
 // Function to get search results for a specific page
 const getSearchResultsPage = function(page = state.search.page) {
-    state.search.page = page; // Update the current page in the state
+    // Update the current page in the state
+    state.search.page = page;
     // Calculate the start and end indices for slicing the results
     const startPageValue = (page - 1) * state.search.resultsPerPage;
     const endPageValue = page * state.search.resultsPerPage;
@@ -2671,12 +2697,31 @@ const getSearchResultsPage = function(page = state.search.page) {
     if (state.search.results.length === 0) return [];
     return state.search.results.slice(startPageValue, endPageValue);
 };
+// Function to update the servings and adjust ingredient quantities
 const updateServings = function(newServings) {
     if (Array.isArray(state.recipe.ingredients)) state.recipe.ingredients.forEach((ing)=>{
+        // Adjust ingredient quantity based on the new servings
         ing.quantity = ing.quantity * newServings / state.recipe.servings;
-    // newQt = oldQt * newServings / oldServings // 2 * 8 / 4 = 4
+    // Formula: newQt = oldQt * newServings / oldServings
     });
+    // Update the servings in the state
     state.recipe.servings = newServings;
+};
+// Function to add a recipe to bookmarks
+const addBookmark = function(recipe) {
+    // Add the recipe to the bookmarks array
+    state.bookmarks.push(recipe);
+    // Mark the current recipe as bookmarked if it matches the recipe ID
+    if (recipe.id === state.recipe.id) state.recipe.bookmarked = true;
+};
+// Function to delete a recipe from bookmarks
+const deleteBookmark = function(id) {
+    // Find the index of the bookmark to delete
+    const index = state.bookmarks.findIndex((el)=>el.id === id);
+    // Remove the bookmark from the bookmarks array
+    state.bookmarks.splice(index, 1);
+    // Mark the current recipe as not bookmarked if it matches the recipe ID
+    if (id === state.recipe.id) state.recipe.bookmarked = false;
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","./config.js":"2hPh4","./helpers.js":"7nL9P"}],"2hPh4":[function(require,module,exports,__globalThis) {
@@ -2768,6 +2813,13 @@ class RecipeView extends (0, _viewJsDefault.default) {
             if (updateTo > 0) handler(updateTo);
         });
     }
+    addHandlerAddBookmark(handler) {
+        this._parentElement.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn--bookmark');
+            if (!btn) return;
+            handler();
+        });
+    }
     /**
    * Generates the markup for the recipe view.
    * @returns {string} - The HTML string for the recipe view.
@@ -2820,9 +2872,9 @@ class RecipeView extends (0, _viewJsDefault.default) {
           </div>
 
           <!-- Bookmark button -->
-          <button class="btn--round">
+          <button class="btn--round btn--bookmark">
             <svg class="">
-              <use href="${0, _iconsSvgDefault.default}#icon-bookmark-fill"></use>
+              <use href="${0, _iconsSvgDefault.default}#icon-bookmark${this._data.bookmarked ? '-fill' : ''}"></use>
             </svg>
           </button>
         </div>
@@ -3289,7 +3341,7 @@ class View {
     /**
    * Clear the content of the parent element
    */ _clear() {
-        this._parentElement.innerHTML = '';
+        this._parentElement.innerHTML = ''; // Remove all child elements from the parent element
     }
     /**
    * Render a spinner (loading indicator) in the parent element
@@ -3333,6 +3385,13 @@ class View {
               </div>`;
         this._clear(); // Clear the parent element
         this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the error message markup
+    }
+    /**
+   * Generate the HTML markup for the view
+   * This method should be implemented in child classes to define how the data is rendered.
+   * @returns {string} - The generated HTML markup
+   */ _generateMarkup() {
+        throw new Error('_generateMarkup method must be implemented in child classes'); // Throw an error if not implemented
     }
 }
 exports.default = View; // Export the View class as the default export

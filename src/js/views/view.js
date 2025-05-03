@@ -57,7 +57,7 @@ class View {
    * Clear the content of the parent element
    */
   _clear() {
-    this._parentElement.innerHTML = '';
+    this._parentElement.innerHTML = ''; // Remove all child elements from the parent element
   }
 
   /**
@@ -107,6 +107,17 @@ class View {
               </div>`;
     this._clear(); // Clear the parent element
     this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the error message markup
+  }
+
+  /**
+   * Generate the HTML markup for the view
+   * This method should be implemented in child classes to define how the data is rendered.
+   * @returns {string} - The generated HTML markup
+   */
+  _generateMarkup() {
+    throw new Error(
+      '_generateMarkup method must be implemented in child classes'
+    ); // Throw an error if not implemented
   }
 }
 
