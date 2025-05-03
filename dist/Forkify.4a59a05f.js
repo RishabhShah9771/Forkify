@@ -688,6 +688,8 @@ const controlRecipe = async function() {
         const id = window.location.hash.slice(1);
         if (!id) return;
         (0, _recipeViewJsDefault.default).renderSpinner();
+        // Updating results view to mark selected search results
+        (0, _resultsViewJsDefault.default).update(_modelJs.getSearchResultsPage());
         await _modelJs.loadRecipe(id);
         (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
     } catch (error) {
@@ -718,7 +720,7 @@ const controlServings = function(newServings) {
     // Update the recipe servings (in state)
     _modelJs.updateServings(newServings);
     // Update the recipe view
-    (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+    (0, _recipeViewJsDefault.default).update(_modelJs.state.recipe);
 };
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
@@ -3254,8 +3256,10 @@ var _iconsSvg = require("url:../../img/icons.svg"); // Importing icons for use i
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
-    // Render the provided data to the DOM
-    render(data) {
+    /**
+   * Render the provided data to the DOM
+   * @param {Object|Array} data - The data to be rendered
+   */ render(data) {
         // If no data is provided or the data is an empty array, render an error message
         if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
         this._data = data; // Store the data in the instance
@@ -3263,12 +3267,33 @@ class View {
         this._clear(); // Clear the parent element
         this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the generated markup into the DOM
     }
-    // Clear the content of the parent element
-    _clear() {
+    /**
+   * Update the DOM with new data without re-rendering the entire view
+   * @param {Object|Array} data - The new data to update the view
+   */ update(data) {
+        this._data = data; // Store the data in the instance
+        const newMarkup = this._generateMarkup(); // Generate the HTML markup based on the new data
+        // Create a virtual DOM from the new markup
+        const newDOM = document.createRange().createContextualFragment(newMarkup);
+        const newElements = Array.from(newDOM.querySelectorAll('*')); // Get all elements from the new DOM
+        const currentElements = Array.from(this._parentElement.querySelectorAll('*')); // Get all elements from the current DOM
+        // Compare new elements with current elements and update only the changed parts
+        newElements.forEach((newEl, i)=>{
+            const curEl = currentElements[i];
+            // Update text content if it has changed
+            if (!newEl.isEqualNode(curEl) && newEl.firstChild?.nodeValue.trim() !== '') curEl.textContent = newEl.textContent;
+            // Update attributes if they have changed
+            if (!newEl.isEqualNode(curEl)) Array.from(newEl.attributes).forEach((attr)=>curEl.setAttribute(attr.name, attr.value));
+        });
+    }
+    /**
+   * Clear the content of the parent element
+   */ _clear() {
         this._parentElement.innerHTML = '';
     }
-    // Render a spinner (loading indicator) in the parent element
-    renderSpinner() {
+    /**
+   * Render a spinner (loading indicator) in the parent element
+   */ renderSpinner() {
         const markup = `
         <div class="spinner">
           <svg>
@@ -3279,8 +3304,10 @@ class View {
         this._parentElement.innerHTML = ''; // Clear the parent element
         this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the spinner markup
     }
-    // Render a success message in the parent element
-    renderMessage(message = this._message) {
+    /**
+   * Render a success message in the parent element
+   * @param {string} [message=this._message] - The success message to display
+   */ renderMessage(message = this._message) {
         const markup = `<div class="message">
               <div>
                 <svg>
@@ -3292,8 +3319,10 @@ class View {
         this._clear(); // Clear the parent element
         this._parentElement.insertAdjacentHTML('afterbegin', markup); // Insert the message markup
     }
-    // Render an error message in the parent element
-    renderError(message = this._errorMessage) {
+    /**
+   * Render an error message in the parent element
+   * @param {string} [message=this._errorMessage] - The error message to display
+   */ renderError(message = this._errorMessage) {
         const markup = `<div class="error">
                 <div>
                   <svg>
@@ -3369,9 +3398,10 @@ class ResultsView extends (0, _viewJsDefault.default) {
    * @param {Object} results - The result object containing recipe details
    * @returns {string} - HTML string for a single result
    */ _generateMarkupPreview(results) {
+        const id = window.location.hash.slice(1);
         return ` 
      <li class="preview">
-            <a class="preview__link preview__link--active" href="#${results.id}">
+            <a class="preview__link ${results.id === id ? `preview__link--active` : ''}" href="#${results.id}">
               <figure class="preview__fig">
                 <img src="${results.image}" alt="${results.title}" />
               </figure>

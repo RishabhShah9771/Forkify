@@ -34,6 +34,7 @@ class RecipeView extends View {
       if (updateTo > 0) handler(updateTo);
     });
   }
+
   /**
    * Generates the markup for the recipe view.
    * @returns {string} - The HTML string for the recipe view.
