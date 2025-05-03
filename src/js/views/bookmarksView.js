@@ -14,6 +14,9 @@ class BookmarksView extends View {
   // Placeholder for any additional messages (currently unused)
   _message = '';
 
+  addHandlerRender(handler) {
+    window.addEventListener('load', handler);
+  }
   // Generate the markup for the bookmarks list
   _generateMarkup() {
     // Map over the bookmarks data and render each bookmark using previewView
