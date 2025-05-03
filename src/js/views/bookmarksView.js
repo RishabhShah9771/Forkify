@@ -21,7 +21,6 @@ class BookmarksView extends View {
     return this._data
       .map(bookmark => previewView.render(bookmark, false))
       .join('');
-      
   }
 }
 
