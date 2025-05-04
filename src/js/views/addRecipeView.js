@@ -1,21 +1,14 @@
-import View from './view.js';
-import icons from 'url:../../img/icons.svg';
-import {
-  BTN_CLOSE_MODAL,
-  BTN_OPEN_MODAL,
-  MODAL_WINDOW_ELEMENT,
-  MODAL_OVERLAY_ELEMENT,
-  MODAL_PARENT_ELEMENT,
-} from '../config.js';
+import View from './View.js';
+import icons from 'url:../../img/icons.svg'; // Parcel 2
 
 class AddRecipeView extends View {
-  // The parent element where pagination buttons will be rendered
-  _parentElement = MODAL_PARENT_ELEMENT;
-  _window = MODAL_WINDOW_ELEMENT;
-  _overlay = MODAL_OVERLAY_ELEMENT;
-  _btnOpen = BTN_OPEN_MODAL;
-    _btnClose = BTN_CLOSE_MODAL;
-    
+  _parentElement = document.querySelector('.upload');
+  _message = 'Recipe was successfully uploaded :)';
+
+  _window = document.querySelector('.add-recipe-window');
+  _overlay = document.querySelector('.overlay');
+  _btnOpen = document.querySelector('.nav__btn--add-recipe');
+  _btnClose = document.querySelector('.btn--close-modal');
 
   constructor() {
     super();
@@ -27,21 +20,25 @@ class AddRecipeView extends View {
     this._overlay.classList.toggle('hidden');
     this._window.classList.toggle('hidden');
   }
+
   _addHandlerShowWindow() {
     this._btnOpen.addEventListener('click', this.toggleWindow.bind(this));
   }
+
   _addHandlerHideWindow() {
     this._btnClose.addEventListener('click', this.toggleWindow.bind(this));
     this._overlay.addEventListener('click', this.toggleWindow.bind(this));
   }
+
   addHandlerUpload(handler) {
-    this._parentElement.addEventListener('submit', function (event) {
-      event.preventDefault();
-      const dataArray = [...new FormData(this)];
-      const data = Object.fromEntries(dataArray);
+    this._parentElement.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const dataArr = [...new FormData(this)];
+      const data = Object.fromEntries(dataArr);
       handler(data);
     });
   }
+
   _generateMarkup() {}
 }
 

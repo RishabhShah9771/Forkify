@@ -1,3 +1,4 @@
+import { async } from 'regenerator-runtime';
 import { TIMEOUT_SEC } from './config.js';
 
 const timeout = function (s) {
@@ -8,25 +9,44 @@ const timeout = function (s) {
   });
 };
 
-const getJSON = async function (url) {
+export const AJAX = async function (url, uploadData = undefined) {
   try {
-    const response = await Promise.race([fetch(url), timeout(TIMEOUT_SEC)]);
-    const data = await response.json();
+    const fetchPro = uploadData
+      ? fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(uploadData),
+        })
+      : fetch(url);
 
-    if (!response.ok)
-      throw new Error(
-        `Recipe not found: (${data.message}) (${response.status})`
-      );
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+    const data = await res.json();
 
+    if (!res.ok) throw new Error(`${data.message} (${res.status})`);
     return data;
-  } catch (err) {}
+  } catch (err) {
+    throw err;
+  }
 };
 
-const setJSON = async function (url, uploadData) {
+/*
+export const getJSON = async function (url) {
   try {
-    // Add a log to inspect the data being sent
-    console.log('Uploading data:', uploadData);
+    const fetchPro = fetch(url);
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+    const data = await res.json();
 
+    if (!res.ok) throw new Error(`${data.message} (${res.status})`);
+    return data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const sendJSON = async function (url, uploadData) {
+  try {
     const fetchPro = fetch(url, {
       method: 'POST',
       headers: {
@@ -34,19 +54,14 @@ const setJSON = async function (url, uploadData) {
       },
       body: JSON.stringify(uploadData),
     });
-    const response = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
-    const data = await response.json();
 
-    if (!response.ok)
-      throw new Error(
-        `Recipe not found: (${data.message}) (${response.status})`
-      );
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+    const data = await res.json();
 
+    if (!res.ok) throw new Error(`${data.message} (${res.status})`);
     return data;
   } catch (err) {
-    console.error('Error in setJSON:', err);
-    throw err; // Rethrow the error to propagate it
+    throw err;
   }
 };
-
-export { getJSON, setJSON };
+*/
